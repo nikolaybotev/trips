@@ -26,12 +26,22 @@ def generate_random_coordinates() -> Tuple[float, float]:
     return lat, lng
 
 
-def generate_trip_times(start_date: datetime, end_date: datetime) -> Tuple[str, str]:
+def generate_trip_times(start_date: datetime, end_date: datetime, earliest_start: datetime = None) -> Tuple[str, str]:
     """Generate trip start and end times within the given date range."""
-    # Generate random start time within the range
-    time_diff = end_date - start_date
-    random_seconds = random.randint(0, int(time_diff.total_seconds()))
-    trip_start = start_date + timedelta(seconds=random_seconds)
+    if earliest_start is None:
+        earliest_start = start_date
+
+    # Ensure earliest_start is not before start_date
+    earliest_start = max(earliest_start, start_date)
+
+    # Generate random start time between earliest_start and end_date
+    time_diff = end_date - earliest_start
+    if time_diff.total_seconds() <= 0:
+        # If no time available, use the earliest possible time
+        trip_start = earliest_start
+    else:
+        random_seconds = random.randint(0, int(time_diff.total_seconds()))
+        trip_start = earliest_start + timedelta(seconds=random_seconds)
 
     # Generate end time (trip duration between 5 minutes and 4 hours)
     trip_duration_minutes = random.randint(5, 240)
@@ -60,8 +70,11 @@ def generate_trips_for_user(user_id: str, start_date: datetime, end_date: dateti
         weights = [0.1, 0.2, 0.3, 0.25, 0.15, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001, 0.000005, 0.000002]
         trips_today = max(1, min(20, random.choices(range(1, 21), weights=weights)[0]))
 
+        # Track the latest trip end time to ensure sequential trips
+        latest_trip_end = current_date
+
         for _ in range(trips_today):
-            trip_start_time, trip_end_time = generate_trip_times(current_date, next_date)
+            trip_start_time, trip_end_time = generate_trip_times(current_date, next_date, latest_trip_end)
             start_lat, start_lng = generate_random_coordinates()
             end_lat, end_lng = generate_random_coordinates()
 
@@ -75,6 +88,12 @@ def generate_trips_for_user(user_id: str, start_date: datetime, end_date: dateti
                 'end_lng': end_lng
             }
             yield trip
+
+            # Update latest trip end time for next trip
+            trip_end_datetime = datetime.fromisoformat(trip_end_time.replace('Z', '+00:00'))
+            # Convert to naive datetime for comparison
+            trip_end_naive = trip_end_datetime.replace(tzinfo=None)
+            latest_trip_end = max(latest_trip_end, trip_end_naive)
 
 
 def generate_all_trips(total_trips: int = 1000000):
