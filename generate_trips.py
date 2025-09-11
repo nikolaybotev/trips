@@ -26,7 +26,7 @@ def generate_random_coordinates() -> Tuple[float, float]:
     return lat, lng
 
 
-def generate_trip_times(start_date: datetime, end_date: datetime) -> Tuple[float, float]:
+def generate_trip_times(start_date: datetime, end_date: datetime) -> Tuple[str, str]:
     """Generate trip start and end times within the given date range."""
     # Generate random start time within the range
     time_diff = end_date - start_date
@@ -37,9 +37,9 @@ def generate_trip_times(start_date: datetime, end_date: datetime) -> Tuple[float
     trip_duration_minutes = random.randint(5, 240)
     trip_end = trip_start + timedelta(minutes=trip_duration_minutes)
 
-    # Convert to IEEE UTC timestamps (seconds since epoch)
-    start_timestamp = trip_start.timestamp()
-    end_timestamp = trip_end.timestamp()
+    # Convert to ISO format timestamps
+    start_timestamp = trip_start.isoformat() + 'Z'
+    end_timestamp = trip_end.isoformat() + 'Z'
 
     return start_timestamp, end_timestamp
 
