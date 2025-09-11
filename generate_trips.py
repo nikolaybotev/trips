@@ -8,7 +8,7 @@ Trip times are within a 1-month range.
 import csv
 import uuid
 import random
-import math
+import argparse
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
@@ -137,13 +137,22 @@ def write_csv(trip_generator, filename: str = 'trips.csv'):
 
 def main():
     """Main function to generate and save trips."""
-    print("Starting trip generation...")
+    parser = argparse.ArgumentParser(description='Generate random trips CSV file')
+    parser.add_argument('--trips', '-t', type=int, default=1000000,
+                       help='Number of trips to generate (default: 1000000)')
+    parser.add_argument('--output', '-o', type=str, default='trips.csv',
+                       help='Output CSV filename (default: trips.csv)')
+
+    args = parser.parse_args()
+
+    print(f"Starting trip generation...")
+    print(f"Generating {args.trips:,} trips to {args.output}")
 
     # Generate trips as a generator
-    trip_generator = generate_all_trips(1000000)
+    trip_generator = generate_all_trips(args.trips)
 
     # Write trips to CSV from the generator
-    write_csv(trip_generator)
+    write_csv(trip_generator, args.output)
 
     print("Trip generation completed!")
 
