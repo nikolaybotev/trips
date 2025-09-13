@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
 PROJECT_ID="feelinsosweet"
-PROJECT_NUMBER="289720198442"
 REGION="us-east1"
 ARTIFACT_REGISTRY_REPOSITORY_NAME="trips-to-staypoints-dataflow"
 ARTIFACT_REGISTRY_URL="us-east1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REGISTRY_REPOSITORY_NAME"
@@ -37,7 +36,7 @@ gcloud artifacts repositories create $ARTIFACT_REGISTRY_REPOSITORY_NAME \
 
 gcloud artifacts repositories add-iam-policy-binding $ARTIFACT_REGISTRY_REPOSITORY_NAME \
   --location=$REGION \
-  --member=serviceAccount:service-$PROJECT_NUMBER@dataflow-service-producer-prod.iam.gserviceaccount.com \
+  --member=serviceAccount:dataflow-worker@$PROJECT_ID.iam.gserviceaccount.com \
   --role=roles/artifactregistry.reader
 
 # Create a new builder
