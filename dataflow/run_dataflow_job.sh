@@ -9,6 +9,7 @@ INPUT_FILE="gs://feelinsosweet-starburst/trips-iceberg/data/trip_start_time_hour
 OUTPUT_PREFIX="gs://feelinsosweet-starburst/staypoints-hive"
 TEMP_LOCATION="gs://feelinsosweet-dataflow/temp"
 STAGING_LOCATION="gs://feelinsosweet-dataflow/staging"
+CONTAINER_IMAGE_URL="us-east1-docker.pkg.dev/feelinsosweet/trips-to-staypoints-dataflow/trips-to-staypoints-dataflow"
 
 # Dataflow job options
 RUNNER="DataflowRunner"  # Use DirectRunner for local testing
@@ -38,7 +39,10 @@ python trips_to_staypoints_dataflow.py \
     --disk_size_gb=50 \
     --experiments=use_runner_v2 \
     --dataflow_service_options=enable_dynamic_thread_scaling \
-    --service_account_email="$WORKER_SERVICE_ACCOUNT"
+    --service_account_email="$WORKER_SERVICE_ACCOUNT" \
+    --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
+    --dataflow_service_options=enable_image_streaming \
+    --sdk_location=container
 
 echo
 echo "Dataflow job submitted!"

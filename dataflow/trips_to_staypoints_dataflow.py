@@ -6,14 +6,16 @@ This replicates the logic from trips_to_staypoints.sql using Apache Beam.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Tuple, Any, Iterator, Iterable
+from typing import Dict, Tuple, Any, Iterator, Iterable
 import json
 
 import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.io import WriteToText
-from apache_beam.io.parquetio import ReadFromParquet, WriteToParquet
+from apache_beam.io.parquetio import ReadFromParquet
+
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 from models import TripData, StaypointData, UserStaypoints
 
@@ -157,8 +159,6 @@ class WritePartitionedParquet(beam.DoFn):
         from apache_beam.io.filesystems import FileSystems
 
         # Convert to Parquet format
-        import pyarrow.parquet as pq
-        import pyarrow as pa
 
         # Define the schema to match the existing nested structure
         schema = pa.schema([
