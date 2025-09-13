@@ -1,2 +1,6 @@
 # Requirements for trip generation script
 # No external dependencies required - uses only Python standard library
+
+# Additional requirements for print_parquet.py script
+pandas>=1.3.0
+pyarrow>=5.0.0
