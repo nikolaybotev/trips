@@ -1,22 +1,27 @@
-#!/bin/bash
+#!/bin/bash -e
 # Script to run the Dataflow job for converting trips to staypoints
 
 # Configuration
 PROJECT_ID="feelinsosweet"
 REGION="us-east1"
-INPUT_FILE="gs://feelinsosweet-starburst/trips-iceberg/data/**"
+WORKER_SERVICE_ACCOUNT="dataflow-worker@feelinsosweet.iam.gserviceaccount.com"
+INPUT_FILE="gs://feelinsosweet-starburst/trips-iceberg/data/trip_start_time_hour=2025-08-12-08**"
 OUTPUT_PREFIX="gs://feelinsosweet-starburst/staypoints-hive"
-TEMP_LOCATION="gs://feelinsosweet-starburst/dataflow/temp"
-STAGING_LOCATION="gs://feelinsosweet-starburst/dataflow/staging"
+TEMP_LOCATION="gs://feelinsosweet-dataflow/temp"
+STAGING_LOCATION="gs://feelinsosweet-dataflow/staging"
 
 # Dataflow job options
 RUNNER="DataflowRunner"  # Use DirectRunner for local testing
+
+# Needed by DataflowRunner
+export GOOGLE_CLOUD_PROJECT=$PROJECT_ID
 
 echo "Starting Dataflow job..."
 echo "Project: $PROJECT_ID"
 echo "Region: $REGION"
 echo "Input: $INPUT_FILE"
 echo "Output: $OUTPUT_PREFIX"
+echo
 
 python trips_to_staypoints_dataflow.py \
     --input="$INPUT_FILE" \
@@ -32,8 +37,10 @@ python trips_to_staypoints_dataflow.py \
     --machine_type=n1-standard-4 \
     --disk_size_gb=50 \
     --experiments=use_runner_v2 \
-    --dataflow_service_options=enable_dynamic_thread_scaling
+    --dataflow_service_options=enable_dynamic_thread_scaling \
+    --service_account_email="$WORKER_SERVICE_ACCOUNT"
 
+echo
 echo "Dataflow job submitted!"
 echo "Check the Dataflow console for job status:"
 echo "https://console.cloud.google.com/dataflow/jobs?project=$PROJECT_ID"
