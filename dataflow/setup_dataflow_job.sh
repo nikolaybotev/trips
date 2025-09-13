@@ -5,6 +5,20 @@ REGION="us-east1"
 ARTIFACT_REGISTRY_REPOSITORY_NAME="trips-to-staypoints-dataflow"
 ARTIFACT_REGISTRY_URL="us-east1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REGISTRY_REPOSITORY_NAME"
 
+# Enable required Google Cloud APIs
+echo "Enabling required Google Cloud APIs..."
+
+gcloud services enable dataflow.googleapis.com --project=$PROJECT_ID
+gcloud services enable compute.googleapis.com --project=$PROJECT_ID
+gcloud services enable storage-component.googleapis.com --project=$PROJECT_ID
+gcloud services enable artifactregistry.googleapis.com --project=$PROJECT_ID
+gcloud services enable containerfilesystem.googleapis.com --project=$PROJECT_ID
+gcloud services enable logging.googleapis.com --project=$PROJECT_ID
+gcloud services enable monitoring.googleapis.com --project=$PROJECT_ID
+
+echo "APIs enabled successfully!"
+echo
+
 # Create Dataflow worker service account
 
 gcloud iam service-accounts create dataflow-worker \
