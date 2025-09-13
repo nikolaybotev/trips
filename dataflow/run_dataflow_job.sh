@@ -5,7 +5,7 @@
 PROJECT_ID="feelinsosweet"
 REGION="us-east1"
 WORKER_SERVICE_ACCOUNT="dataflow-worker@feelinsosweet.iam.gserviceaccount.com"
-INPUT_FILE="gs://feelinsosweet-starburst/trips-iceberg/data/trip_start_time_hour=2025-08-12-08**"
+INPUT_FILE="gs://feelinsosweet-starburst/trips-iceberg/data/trip_start_time_hour=2025-08-12-1**"
 OUTPUT_PREFIX="gs://feelinsosweet-starburst/staypoints-hive"
 TEMP_LOCATION="gs://feelinsosweet-dataflow/temp"
 STAGING_LOCATION="gs://feelinsosweet-dataflow/staging"
