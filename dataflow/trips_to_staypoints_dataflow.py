@@ -151,6 +151,8 @@ class WritePartitionedParquet(beam.DoFn):
 
     def process(self, user_staypoints: UserStaypoints):
         # Create Hive-style file path
+        # See https://beam.apache.org/releases/pydoc/current/apache_beam.io.fileio.html#dynamic-destinations
+        # for a possible solution using beam.io.fileio.WriteToFiles
         p1 = user_staypoints.p1
         p2 = user_staypoints.p2
         user_id = user_staypoints.user_id
