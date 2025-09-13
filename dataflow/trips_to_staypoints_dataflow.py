@@ -4,7 +4,6 @@ Dataflow job to convert trips data to staypoints data.
 This replicates the logic from trips_to_staypoints.sql using Apache Beam.
 """
 
-import argparse
 import logging
 from datetime import datetime
 from typing import Dict, List, Tuple, Any, Iterator, Iterable
@@ -17,6 +16,17 @@ from apache_beam.io.parquetio import ReadFromParquet, WriteToParquet
 import pyarrow as pa
 
 from models import TripData, StaypointData, UserStaypoints
+
+
+class CustomPipelineOptions(PipelineOptions):
+    """Custom pipeline options to include our custom arguments."""
+
+    @classmethod
+    def _add_argparse_args(cls, parser):
+        parser.add_argument('--input', required=True, help='Input Parquet file path or GCS path')
+        parser.add_argument('--output', required=True, help='Output file path')
+        parser.add_argument('--output_format', default='json', choices=['json', 'csv', 'hive'],
+                           help='Output format (json, csv, or hive)')
 
 
 class ParseTripData(beam.DoFn):
@@ -186,22 +196,14 @@ class WritePartitionedParquet(beam.DoFn):
 def run_pipeline(argv=None):
     """Main pipeline function."""
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input', required=True, help='Input Parquet file path or GCS path')
-    parser.add_argument('--output', required=True, help='Output file path')
-    parser.add_argument('--output_format', default='json', choices=['json', 'csv', 'hive'],
-                       help='Output format (json, csv, or hive)')
+    # Set up pipeline options with custom arguments
+    opts = CustomPipelineOptions(argv)
 
-    known_args, pipeline_args = parser.parse_known_args(argv)
-
-    # Set up pipeline options
-    pipeline_options = PipelineOptions(pipeline_args)
-
-    with beam.Pipeline(options=pipeline_options) as pipeline:
+    with beam.Pipeline(options=opts) as pipeline:
         # Read input data from Parquet files
         trips = (
             pipeline
-            | 'ReadTrips' >> ReadFromParquet(known_args.input)
+            | 'ReadTrips' >> ReadFromParquet(opts.input)
             | 'ParseTripData' >> beam.ParDo(ParseTripData())
         )
 
@@ -219,23 +221,23 @@ def run_pipeline(argv=None):
         )
 
         # Format and write output
-        if known_args.output_format == 'json':
+        if opts.output_format == 'json':
             output = (
                 staypoints
                 | 'FormatJSON' >> beam.ParDo(FormatJSON())
-                | 'WriteOutput' >> WriteToText(known_args.output, file_name_suffix='.json')
+                | 'WriteOutput' >> WriteToText(opts.output, file_name_suffix='.json')
             )
-        elif known_args.output_format == 'csv':
+        elif opts.output_format == 'csv':
             output = (
                 staypoints
                 | 'FormatCSV' >> beam.Map(lambda x: f"{x.user_id},{x.p1},{x.p2},{json.dumps([sp.to_dict() for sp in x.staypoints])}")
-                | 'WriteOutput' >> WriteToText(known_args.output, file_name_suffix='.csv')
+                | 'WriteOutput' >> WriteToText(opts.output, file_name_suffix='.csv')
             )
         else:  # hive format
             # Group staypoints by user and write to Parquet with Hive partitioning
             output = (
                 staypoints
-                | 'WritePartitionedParquet' >> beam.ParDo(WritePartitionedParquet(known_args.output))
+                | 'WritePartitionedParquet' >> beam.ParDo(WritePartitionedParquet(opts.output))
             )
 
 
