@@ -35,10 +35,10 @@ python trips_to_staypoints_dataflow.py \
     --job_name="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)" \
     --max_num_workers=10 \
     --machine_type=n1-standard-4 \
+    --disk_size_gb=50 \
     --experiments=use_runner_v2 \
     --dataflow_service_options=enable_dynamic_thread_scaling \
-    --service_account_email="$WORKER_SERVICE_ACCOUNT" \
-    --enable_streaming_engine
+    --service_account_email="$WORKER_SERVICE_ACCOUNT"
 
 echo
 echo "Dataflow job submitted!"
