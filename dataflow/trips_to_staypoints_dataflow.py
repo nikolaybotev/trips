@@ -191,11 +191,6 @@ def run_pipeline(argv=None):
     parser.add_argument('--output', required=True, help='Output file path')
     parser.add_argument('--output_format', default='json', choices=['json', 'csv', 'hive'],
                        help='Output format (json, csv, or hive)')
-    parser.add_argument('--project', help='GCP Project ID')
-    parser.add_argument('--region', default='us-central1', help='GCP Region')
-    parser.add_argument('--runner', default='DirectRunner', help='Beam runner')
-    parser.add_argument('--temp_location', help='Temporary location for Dataflow')
-    parser.add_argument('--staging_location', help='Staging location for Dataflow')
 
     known_args, pipeline_args = parser.parse_known_args(argv)
 
