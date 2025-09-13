@@ -23,12 +23,36 @@ Each trip record contains:
 
 ## Installation
 
-No external dependencies required - uses only Python standard library.
+### Quick Setup
 
 ```bash
 git clone https://github.com/yourusername/trips.git
 cd trips
+source ./setup.sh
 ```
+
+The `setup.sh` script will:
+1. Create a Python 3.12 virtual environment
+2. Activate the virtual environment
+3. Install all required dependencies
+
+### Manual Setup
+
+If you prefer to set up manually:
+
+```bash
+git clone https://github.com/yourusername/trips.git
+cd trips
+
+# Create virtual environment with Python 3.12 (required for Apache Beam compatibility)
+python3.12 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+**Note**: This project requires Python 3.12 for Apache Beam compatibility. Python 3.13 is not supported by Apache Beam 2.67.
 
 ## Usage
 
@@ -98,7 +122,17 @@ python3 generate_trips.py --trips 100000000 --output large_trips.csv
 trips/
 ├── generate_trips.py          # Main Python script
 ├── generate_multiple_trips.sh # Batch generation script
-├── requirements.txt          # Dependencies (none required)
+├── requirements.txt          # Dependencies
+├── setup.sh                  # Environment setup script
+├── dataflow/                 # Apache Beam Dataflow jobs
+│   ├── trips_to_staypoints_dataflow.py
+│   ├── run_dataflow_job.sh
+│   ├── test_dataflow_local.sh
+│   └── README.md
+├── scripts/                  # SQL scripts and utilities
+│   ├── trips_to_staypoints.sql
+│   ├── starburst_import.sql
+│   └── STARBURST_SETUP.md
 ├── .vscode/
 │   └── settings.json        # VS Code settings
 ├── README.md                # This file

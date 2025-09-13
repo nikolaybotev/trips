@@ -1,6 +1,11 @@
 # Requirements for trip generation script
 # No external dependencies required - uses only Python standard library
 
-# Additional requirements for print_parquet.py script
+# Requirements for print_parquet.py script and Dataflow job
 pandas>=1.3.0
 pyarrow>=5.0.0
+
+# Requirements for Dataflow job
+# IMPORTANT: Apache Beam 2.67 does NOT support Python 3.13
+# Use Python 3.12 or upgrade to Apache Beam 2.68+ for Python 3.13 support
+apache-beam[gcp]==2.67.0
