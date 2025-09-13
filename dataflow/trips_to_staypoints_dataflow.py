@@ -153,7 +153,8 @@ class WritePartitionedParquet(beam.DoFn):
         # Create Hive-style file path
         p1 = user_staypoints.p1
         p2 = user_staypoints.p2
-        file_path = f"{self.output_path}/p1={p1}/p2={p2}/data.parquet"
+        user_id = user_staypoints.user_id
+        file_path = f"{self.output_path}/p1={p1}/p2={p2}/{user_id}.parquet"
 
         # Use Beam's file system to write
         from apache_beam.io.filesystems import FileSystems
