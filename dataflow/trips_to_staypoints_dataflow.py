@@ -16,66 +16,7 @@ from apache_beam.io import WriteToText
 from apache_beam.io.parquetio import ReadFromParquet, WriteToParquet
 import pyarrow as pa
 
-
-class TripData:
-    """Data class representing a trip record."""
-
-    def __init__(self, user_id: str, trip_start_time: str, trip_end_time: str,
-                 start_lat: float, start_lng: float, end_lat: float, end_lng: float):
-        self.user_id = user_id
-        self.trip_start_time = trip_start_time
-        self.trip_end_time = trip_end_time
-        self.start_lat = start_lat
-        self.start_lng = start_lng
-        self.end_lat = end_lat
-        self.end_lng = end_lng
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'user_id': self.user_id,
-            'trip_start_time': self.trip_start_time,
-            'trip_end_time': self.trip_end_time,
-            'start_lat': self.start_lat,
-            'start_lng': self.start_lng,
-            'end_lat': self.end_lat,
-            'end_lng': self.end_lng
-        }
-
-
-class StaypointData:
-    """Data class representing a staypoint record."""
-
-    def __init__(self, enter_time: datetime, exit_time: datetime, lat: float, lng: float):
-        self.enter_time = enter_time
-        self.exit_time = exit_time
-        self.lat = lat
-        self.lng = lng
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'enter_time': self.enter_time,
-            'exit_time': self.exit_time,
-            'lat': self.lat,
-            'lng': self.lng
-        }
-
-
-class UserStaypoints:
-    """Data class representing aggregated staypoints for a user."""
-
-    def __init__(self, user_id: str, staypoints: List[StaypointData], p1: str, p2: str):
-        self.user_id = user_id
-        self.staypoints = staypoints
-        self.p1 = p1
-        self.p2 = p2
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'user_id': self.user_id,
-            'staypoints': [sp.to_dict() for sp in self.staypoints],
-            'p1': self.p1,
-            'p2': self.p2
-        }
+from models import TripData, StaypointData, UserStaypoints
 
 
 class ParseTripData(beam.DoFn):
@@ -197,27 +138,9 @@ class WritePartitionedParquet(beam.DoFn):
         self.output_path = output_path
 
     def process(self, user_staypoints: UserStaypoints):
-        # Convert staypoints to list of dictionaries for nested structure
-        staypoints_list = []
-        for staypoint in user_staypoints.staypoints:
-            staypoints_list.append({
-                'enter_time': staypoint.enter_time,
-                'exit_time': staypoint.exit_time,
-                'lat': staypoint.lat,
-                'lng': staypoint.lng
-            })
-
-        element = {
-            'user_id': user_staypoints.user_id,
-            'staypoints': staypoints_list,
-            'p1': user_staypoints.p1,
-            'p2': user_staypoints.p2
-        }
-
-        p1 = element['p1']
-        p2 = element['p2']
-
         # Create Hive-style file path
+        p1 = user_staypoints.p1
+        p2 = user_staypoints.p2
         file_path = f"{self.output_path}/p1={p1}/p2={p2}/data.parquet"
 
         # Use Beam's file system to write
@@ -239,6 +162,9 @@ class WritePartitionedParquet(beam.DoFn):
             ('p1', pa.string()),
             ('p2', pa.string())
         ])
+
+        # Convert staypoints to list of dictionaries for nested structure
+        element = user_staypoints.to_dict()
 
         # Create Arrow table from single record with explicit schema
         # Convert dict to separate arrays for each column
