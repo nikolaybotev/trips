@@ -36,9 +36,9 @@ python trips_to_staypoints_dataflow.py \
     --temp_location="$TEMP_LOCATION" \
     --staging_location="$STAGING_LOCATION" \
     --job_name="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)" \
-    --max_num_workers=10 \
+    --max_num_workers=20 \
     --machine_type=n1-standard-4 \
-    --disk_size_gb=50 \
+    --disk_size_gb=500 \
     --experiments=use_runner_v2 \
     --dataflow_service_options=enable_dynamic_thread_scaling \
     --service_account_email="$WORKER_SERVICE_ACCOUNT" \
