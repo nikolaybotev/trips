@@ -31,7 +31,8 @@ python trips_to_staypoints_dataflow.py \
     --max_num_workers=10 \
     --machine_type=n1-standard-4 \
     --disk_size_gb=50 \
-    --experiments=use_runner_v2
+    --experiments=use_runner_v2 \
+    --dataflow_service_options=enable_dynamic_thread_scaling
 
 echo "Dataflow job submitted!"
 echo "Check the Dataflow console for job status:"
