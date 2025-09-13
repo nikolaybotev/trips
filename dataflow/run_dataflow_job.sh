@@ -24,6 +24,8 @@ echo "Input: $INPUT_FILE"
 echo "Output: $OUTPUT_PREFIX"
 echo
 
+# Start the Dataflow job with the following pipeline options:
+# See https://cloud.google.com/dataflow/docs/reference/pipeline-options#pythonyaml_3
 python trips_to_staypoints_dataflow.py \
     --input="$INPUT_FILE" \
     --output="$OUTPUT_PREFIX" \
@@ -42,7 +44,8 @@ python trips_to_staypoints_dataflow.py \
     --service_account_email="$WORKER_SERVICE_ACCOUNT" \
     --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
     --dataflow_service_options=enable_image_streaming \
-    --sdk_location=container
+    --sdk_location=container \
+    --no_use_public_ips
 
 echo
 echo "Dataflow job submitted!"
