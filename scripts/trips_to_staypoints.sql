@@ -1,6 +1,7 @@
 CREATE TABLE staypoints2
 WITH (
-    type = 'hive',
+    type = 'HIVE',
+    format = 'PARQUET',
     partitioned_by = ARRAY['p1', 'p2']
 )
 AS (
