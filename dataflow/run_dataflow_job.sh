@@ -35,15 +35,15 @@ python trips_to_staypoints_dataflow.py \
     --runner="$RUNNER" \
     --temp_location="$TEMP_LOCATION" \
     --staging_location="$STAGING_LOCATION" \
+    --service_account_email="$WORKER_SERVICE_ACCOUNT" \
     --job_name="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)" \
     --max_num_workers=20 \
     --machine_type=n1-standard-4 \
-    --disk_size_gb=500 \
+    --disk_size_gb=50 \
+    --worker_disk_type=compute.googleapis.com/projects/$PROJECT_ID/zones/$REGION/diskTypes/pd-ssd \
     --experiments=use_runner_v2 \
-    --dataflow_service_options=enable_dynamic_thread_scaling \
-    --service_account_email="$WORKER_SERVICE_ACCOUNT" \
-    --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
     --dataflow_service_options=enable_image_streaming \
+    --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
     --sdk_location=container \
     --no_use_public_ips \
     --subnetwork=https://www.googleapis.com/compute/v1/projects/feelinsosweet/regions/us-east1/subnetworks/dataflow-subnet
