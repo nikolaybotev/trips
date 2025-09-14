@@ -149,19 +149,16 @@ class WritePartitionedParquet(beam.DoFn):
     def __init__(self, output_path: str):
         self.output_path = output_path
 
-    def process(self, user_staypoints: UserStaypoints):
-        # Create Hive-style file path
-        # See https://beam.apache.org/releases/pydoc/current/apache_beam.io.fileio.html#dynamic-destinations
-        # for a possible solution using beam.io.fileio.WriteToFiles
-        p1 = user_staypoints.p1
-        p2 = user_staypoints.p2
-        user_id = user_staypoints.user_id
-        file_path = f"{self.output_path}/p1={p1}/p2={p2}/{user_id}.parquet"
+    def process(self, partition_data: Tuple[Tuple[str, str], Iterable[UserStaypoints]]):
+        # Extract partition key and user staypoints list
+        (p1, p2), user_staypoints_iterable = partition_data
+        user_staypoints_list = list(user_staypoints_iterable)
+
+        # Create Hive-style file path (one file per partition, not per user)
+        file_path = f"{self.output_path}/p1={p1}/p2={p2}/staypoints.parquet"
 
         # Use Beam's file system to write
         from apache_beam.io.filesystems import FileSystems
-
-        # Convert to Parquet format
 
         # Define the schema to match the existing nested structure
         schema = pa.schema([
@@ -176,22 +173,26 @@ class WritePartitionedParquet(beam.DoFn):
             ('p2', pa.string())
         ])
 
-        # Convert staypoints to list of dictionaries for nested structure
-        element = user_staypoints.to_dict()
+        # Convert all user staypoints to list of dictionaries for nested structure
+        all_records = []
+        for user_staypoints in user_staypoints_list:
+            element = user_staypoints.to_dict()
+            all_records.append(element)
 
-        # Create Arrow table from single record with explicit schema
-        # Convert dict to separate arrays for each column
-        arrays = [
-            pa.array([element['user_id']]),
-            pa.array([element['staypoints']]),
-            pa.array([element['p1']]),
-            pa.array([element['p2']])
-        ]
-        table = pa.table(arrays, schema=schema)
+        # Create Arrow table from all records with explicit schema
+        if all_records:
+            # Convert list of dicts to separate arrays for each column
+            arrays = [
+                pa.array([record['user_id'] for record in all_records]),
+                pa.array([record['staypoints'] for record in all_records]),
+                pa.array([record['p1'] for record in all_records]),
+                pa.array([record['p2'] for record in all_records])
+            ]
+            table = pa.table(arrays, schema=schema)
 
-        # Write to file using Beam's file system
-        with FileSystems.create(file_path) as f:
-            pq.write_table(table, f)
+            # Write to file using Beam's file system
+            with FileSystems.create(file_path) as f:
+                pq.write_table(table, f)
 
         yield file_path
 
@@ -237,9 +238,15 @@ def run_pipeline(argv=None):
                 | 'WriteOutput' >> WriteToText(opts.output, file_name_suffix='.csv')
             )
         else:  # hive format
-            # Group staypoints by user and write to Parquet with Hive partitioning
-            output = (
+            # Group staypoints by (p1, p2) partition and write to Parquet with Hive partitioning
+            partition_grouped = (
                 staypoints
+                | 'KeyByPartition' >> beam.Map(lambda user_staypoints: ((user_staypoints.p1, user_staypoints.p2), user_staypoints))
+                | 'GroupByPartition' >> beam.GroupByKey()
+            )
+
+            output = (
+                partition_grouped
                 | 'WritePartitionedParquet' >> beam.ParDo(WritePartitionedParquet(opts.output))
             )
 
