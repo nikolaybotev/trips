@@ -18,6 +18,15 @@ ARTIFACT_REGISTRY_REPOSITORY_NAME=$(extract_tfvars_value "artifact_registry_repo
 SUBNET_NAME=$(extract_tfvars_value "subnet_name")
 SERVICE_ACCOUNT_NAME=$(extract_tfvars_value "service_account_name")
 
+# Image name
+DOCKER_IMAGE_NAME="trips-to-staypoints-dataflow"
+
+# Image URL
+CONTAINER_IMAGE_URL="$REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REGISTRY_REPOSITORY_NAME/$DOCKER_IMAGE_NAME"
+
+# Image version
+VERSION="${1:-latest}"
+
 # Display configuration
 echo "Configuration loaded:"
 echo "  - project: $PROJECT_ID"

@@ -10,7 +10,7 @@ INPUT_FILES="gs://${PROJECT_ID}-starburst/trips-iceberg/data/trip_start_time_hou
 OUTPUT_PREFIX="gs://${PROJECT_ID}-starburst/staypoints-hive-new"
 TEMP_LOCATION="gs://${PROJECT_ID}-dataflow/temp"
 STAGING_LOCATION="gs://${PROJECT_ID}-dataflow/staging"
-CONTAINER_IMAGE_URL="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY_NAME}/trips-to-staypoints-dataflow"
+CONTAINER_IMAGE_URL="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY_NAME}/${DOCKER_IMAGE_NAME}"
 SUBNETWORK_URL="https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/regions/${REGION}/subnetworks/${SUBNET_NAME}"
 
 # Job-specific configuration
@@ -46,7 +46,7 @@ python trips_to_staypoints/main.py \
     --dataflow_service_options=enable_prime \
     --dataflow_service_options=enable_dynamic_thread_scaling \
     --dataflow_service_options=enable_image_streaming \
-    --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
+    --sdk_container_image="$CONTAINER_IMAGE_URL:$VERSION" \
     --sdk_location=container \
     --no_use_public_ips \
     --subnetwork=$SUBNETWORK_URL
