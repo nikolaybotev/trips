@@ -1,15 +1,10 @@
 #!/bin/bash -e
 # Script to run the Dataflow job for converting trips to staypoints
 
-# Configuration
-PROJECT_ID="feelinsosweet"
-REGION="us-east1"
-WORKER_SERVICE_ACCOUNT="dataflow-worker@feelinsosweet.iam.gserviceaccount.com"
-INPUT_FILES="gs://feelinsosweet-starburst/trips-iceberg/data/**"
-OUTPUT_PREFIX="gs://feelinsosweet-starburst/staypoints-hive-full"
-TEMP_LOCATION="gs://feelinsosweet-dataflow/temp"
-STAGING_LOCATION="gs://feelinsosweet-dataflow/staging"
-CONTAINER_IMAGE_URL="us-east1-docker.pkg.dev/feelinsosweet/trips-to-staypoints-dataflow/trips-to-staypoints-dataflow"
+# Load configuration
+source ./config.sh
+
+# Job-specific configuration
 JOB_NAME="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)"
 
 echo "Starting Dataflow job..."
@@ -45,7 +40,7 @@ python trips_to_staypoints_dataflow.py \
     --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
     --sdk_location=container \
     --no_use_public_ips \
-    --subnetwork=https://www.googleapis.com/compute/v1/projects/feelinsosweet/regions/us-east1/subnetworks/dataflow-subnet
+    --subnetwork=$SUBNETWORK_URL
 
 echo
 echo "Dataflow job submitted!"
