@@ -1,5 +1,5 @@
 # GCP Project Configuration
-project_id = "feelinsodev"
+project_id = "feelinsosweet"
 region     = "us-east1"
 
 # Artifact Registry Configuration
