@@ -35,6 +35,11 @@ resource "google_storage_bucket" "dataflow_bucket" {
 
   # Prevent public access
   public_access_prevention = "enforced"
+
+  # Disable soft delete policy
+  soft_delete_policy {
+    retention_duration_seconds = 0
+  }
 }
 
 # Reference existing data bucket
