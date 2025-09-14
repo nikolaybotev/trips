@@ -6,8 +6,8 @@ source ./config.sh
 
 # Run configuration
 WORKER_SERVICE_ACCOUNT="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
-INPUT_FILES="gs://${PROJECT_ID}-starburst/trips-iceberg/data/trip_start_time_hour=2025-08-12-0**"
-OUTPUT_PREFIX="gs://${PROJECT_ID}-starburst/staypoints-hive-new"
+INPUT_FILES="gs://${DATA_BUCKET_NAME}/trips-iceberg/data/trip_start_time_hour=2025-08-12-0**"
+OUTPUT_PREFIX="gs://${DATA_BUCKET_NAME}/staypoints-hive-new"
 TEMP_LOCATION="gs://${PROJECT_ID}-dataflow/temp"
 STAGING_LOCATION="gs://${PROJECT_ID}-dataflow/staging"
 CONTAINER_IMAGE_URL="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY_NAME}/${DOCKER_IMAGE_NAME}"

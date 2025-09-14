@@ -17,9 +17,10 @@ REGION=$(extract_tfvars_value "region")
 ARTIFACT_REGISTRY_REPOSITORY_NAME=$(extract_tfvars_value "artifact_registry_repository_name")
 SUBNET_NAME=$(extract_tfvars_value "subnet_name")
 SERVICE_ACCOUNT_NAME=$(extract_tfvars_value "service_account_name")
+DATA_BUCKET_NAME=$(extract_tfvars_value "data_bucket_name")
 
 # Image name
-DOCKER_IMAGE_NAME="trips-to-staypoints-dataflow"
+DOCKER_IMAGE_NAME="trips-to-staypoints"
 
 # Image URL
 CONTAINER_IMAGE_URL="$REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REGISTRY_REPOSITORY_NAME/$DOCKER_IMAGE_NAME"

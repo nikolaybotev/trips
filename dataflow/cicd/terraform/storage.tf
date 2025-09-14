@@ -40,3 +40,8 @@ resource "google_storage_bucket" "dataflow_bucket" {
     google_project_service.storage
   ]
 }
+
+# Reference existing data bucket
+data "google_storage_bucket" "data_bucket" {
+  name = var.data_bucket_name
+}

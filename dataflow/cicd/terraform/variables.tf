@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
-  default     = "feelinsosweet"
+  default     = "feelinsodev"
 }
 
 variable "region" {
@@ -13,7 +13,7 @@ variable "region" {
 variable "artifact_registry_repository_name" {
   description = "Name for the Artifact Registry repository"
   type        = string
-  default     = "trips-to-staypoints-dataflow"
+  default     = "dataflow-job"
 }
 
 variable "subnet_name" {
@@ -32,4 +32,10 @@ variable "service_account_name" {
   description = "Name for the Dataflow worker service account"
   type        = string
   default     = "dataflow-worker"
+}
+
+variable "data_bucket_name" {
+  description = "Name for the Data GCS bucket"
+  type        = string
+  default     = "feelinsosweet-starburst"
 }
