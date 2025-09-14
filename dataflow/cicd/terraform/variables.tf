@@ -39,3 +39,15 @@ variable "data_bucket_name" {
   type        = string
   default     = "feelinsosweet-starburst"
 }
+
+variable "vpc_name" {
+  description = "Name for the dedicated Dataflow VPC"
+  type        = string
+  default     = "dataflow-vpc"
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for the dedicated Dataflow VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}

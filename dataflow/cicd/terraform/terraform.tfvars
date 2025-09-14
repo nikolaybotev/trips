@@ -6,6 +6,8 @@ region     = "us-east1"
 artifact_registry_repository_name = "dataflow-job"
 
 # Network Configuration
+vpc_name   = "dataflow-vpc"
+vpc_cidr   = "10.0.0.0/16"
 subnet_name = "dataflow-subnet"
 subnet_cidr = "10.0.0.0/24"
 
