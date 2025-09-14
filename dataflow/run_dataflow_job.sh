@@ -37,8 +37,9 @@ python trips_to_staypoints_dataflow.py \
     --staging_location="$STAGING_LOCATION" \
     --service_account_email="$WORKER_SERVICE_ACCOUNT" \
     --job_name="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)" \
+    --min_num_workers=20 \
     --max_num_workers=20 \
-    --disk_size_gb=50 \
+    --disk_size_gb=20 \
     --worker_disk_type=compute.googleapis.com/projects/$PROJECT_ID/zones/$REGION/diskTypes/pd-ssd \
     --experiments=use_runner_v2 \
     --dataflow_service_options=enable_prime \
