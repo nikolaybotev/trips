@@ -32,13 +32,12 @@ resource "google_project_iam_member" "dataflow_worker" {
   ]
 }
 
-resource "google_project_iam_member" "storage_object_user" {
-  project = var.project_id
+resource "google_storage_bucket_iam_member" "storage_object_user" {
+  bucket = google_storage_bucket.dataflow_bucket.name
   role    = "roles/storage.objectUser"
   member  = "serviceAccount:${google_service_account.dataflow_worker.email}"
 
   depends_on = [
-    google_service_account.dataflow_worker,
     google_project_service.storage
   ]
 }
