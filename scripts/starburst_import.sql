@@ -16,9 +16,10 @@ CREATE TABLE trips_data.trips_raw (
     end_lng VARCHAR
 )
 WITH (
+    external_location = 'gs://feelinsosweet-starburst/trips-raw-csv/',
     format = 'CSV',
-    external_location = 's3://feelinsosweet-starburst/trips-data/',
-    skip_header_line_count = 1
+    skip_header_line_count = 1,
+    type = 'HIVE'
 );
 
 -- Step 2b: Create a view with proper data types
