@@ -14,9 +14,15 @@ The Dataflow job processes trip data and converts it to staypoints data by:
 ## Files
 
 - `trips_to_staypoints/main.py` - Main Dataflow pipeline
-- `requirements_dataflow.txt` - Python dependencies
+- `trips_to_staypoints/models.py` - Data models and classes
+- `trips_to_staypoints/requirements.txt` - Python dependencies
+- `Dockerfile` - Container image definition
+- `config.sh` - Configuration loader from Terraform
 - `run_dataflow_job.sh` - Script to run on Google Cloud Dataflow
 - `test_dataflow_local.sh` - Script to test locally
+- `cicd/terraform/` - Infrastructure as Code configuration
+- `input/` - Sample input data (Parquet files)
+- `output/` - Dataflow job outputs
 - `README.md` - This file
 
 ## Setup
@@ -24,7 +30,7 @@ The Dataflow job processes trip data and converts it to staypoints data by:
 ### 1. Install Dependencies
 
 ```bash
-pip install -r requirements_dataflow.txt
+pip install -r trips_to_staypoints/requirements.txt
 ```
 
 ### 2. Local Testing
@@ -34,18 +40,47 @@ pip install -r requirements_dataflow.txt
 ./test_dataflow_local.sh
 ```
 
-### 3. Google Cloud Dataflow Deployment
+### 3. Infrastructure Setup (Terraform)
 
-1. Set up your GCP project and enable Dataflow API
-2. Update the configuration in `run_dataflow_job.sh`:
-   - Set your `PROJECT_ID`
-   - Update bucket paths for input/output
-   - Adjust other parameters as needed
+Before deploying to Google Cloud Dataflow, set up the infrastructure:
 
-3. Run the job:
 ```bash
+cd cicd/terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+This creates:
+- Service accounts with appropriate permissions
+- Artifact Registry for container images
+- GCS buckets for data storage
+- VPC subnet for secure execution
+
+### 4. Container Build and Deployment
+
+1. Build the Docker container:
+```bash
+# Build and push container image
+docker build -t trips-to-staypoints .
+docker tag trips-to-staypoints gcr.io/PROJECT_ID/trips-to-staypoints
+docker push gcr.io/PROJECT_ID/trips-to-staypoints
+```
+
+2. Run the Dataflow job:
+```bash
+# Load configuration from Terraform
+source ./config.sh
+
+# Deploy to Google Cloud Dataflow
 ./run_dataflow_job.sh
 ```
+
+The deployment script automatically:
+- Uses the containerized image
+- Configures secure networking (no public IPs)
+- Sets up proper service account permissions
+- Enables performance optimizations
 
 ## Input Data Format
 
@@ -112,10 +147,38 @@ This format is compatible with Hive/Spark queries and provides efficient partiti
 - **Scalable**: Uses Apache Beam for distributed processing
 - **Fault-tolerant**: Built-in retry and error handling
 - **Flexible**: Supports both local testing and cloud deployment
+- **Containerized**: Docker-based deployment for reproducibility
+- **Infrastructure as Code**: Terraform-managed GCP resources
 - **Partitioned**: Creates partition keys (p1, p2) from user_id
 - **Window Functions**: Implements LEAD window function logic
 - **Data Validation**: Handles malformed data gracefully
 - **Multiple Output Formats**: JSON, CSV, and Hive-partitioned Parquet
+- **Performance Optimized**: Uses latest Dataflow features and SSD storage
+
+## Configuration
+
+The Dataflow job uses a configuration system that integrates with Terraform:
+
+### Configuration Loading
+- `config.sh` automatically loads settings from `cicd/terraform/terraform.tfvars`
+- No manual configuration needed - everything is managed through Terraform
+- Supports different environments through Terraform workspaces
+
+### Key Configuration Parameters
+- **Project ID**: GCP project for deployment
+- **Region**: GCP region for resources
+- **Service Account**: Dataflow worker service account
+- **Artifact Registry**: Container image repository
+- **Data Bucket**: GCS bucket for input/output data
+- **Subnet**: VPC subnet for secure execution
+
+### Performance Tuning
+The deployment script includes optimized settings:
+- **Runner v2**: Latest Dataflow runner with improved performance
+- **Prime**: Enhanced autoscaling and resource management
+- **Dynamic Thread Scaling**: Automatic thread optimization
+- **Image Streaming**: Faster container startup
+- **SSD Storage**: High-performance disk for workers
 
 ## SQL to Dataflow Mapping
 
@@ -139,3 +202,9 @@ This format is compatible with Hive/Spark queries and provides efficient partiti
 2. **Timeout**: Increase `max_num_workers` or adjust batch size
 3. **Data format errors**: Check input Parquet schema matches expected format
 4. **Permission errors**: Ensure service account has necessary GCS/BigQuery permissions
+5. **Container build failures**: Check Dockerfile and requirements.txt syntax
+6. **Terraform errors**: Verify GCP authentication and project permissions
+7. **Network issues**: Ensure subnet has Private Google Access enabled
+8. **Artifact Registry access**: Verify service account has container read permissions
+9. **Configuration loading**: Check terraform.tfvars file exists and has correct format
+10. **Local testing**: Ensure input Parquet files are in correct directory structure

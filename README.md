@@ -120,25 +120,34 @@ python3 generate_trips.py --trips 100000000 --output large_trips.csv
 
 ```
 trips/
-├── generate_trips.py          # Main Python script
-├── generate_multiple_trips.sh # Batch generation script
-├── requirements.txt          # Dependencies
-├── setup.sh                  # Environment setup script
+├── data/                     # Data generation scripts and utilities
+│   ├── generate_trips.py     # Main Python script
+│   ├── generate_multiple_trips.sh # Batch generation script
+│   ├── print_pandas.py       # Pandas data analysis utility
+│   ├── trips_to_staypoints.sql # SQL conversion script
+│   ├── starburst_import.sql  # Starburst import script
+│   └── STARBURST_SETUP.md    # Starburst setup guide
 ├── dataflow/                 # Apache Beam Dataflow jobs
 │   ├── trips_to_staypoints/
-│   │   ├── main.py
-│   │   └── models.py
-│   ├── run_dataflow_job.sh
-│   ├── test_dataflow_local.sh
-│   └── README.md
-├── scripts/                  # SQL scripts and utilities
-│   ├── trips_to_staypoints.sql
-│   ├── starburst_import.sql
-│   └── STARBURST_SETUP.md
-├── .vscode/
-│   └── settings.json        # VS Code settings
-├── README.md                # This file
-└── LICENSE                  # MIT License
+│   │   ├── main.py           # Main Dataflow pipeline
+│   │   ├── models.py         # Data models
+│   │   └── requirements.txt  # Dataflow dependencies
+│   ├── cicd/                 # Infrastructure as Code
+│   │   └── terraform/        # Terraform configuration
+│   │       ├── *.tf          # Terraform resource files
+│   │       ├── terraform.tfvars # Configuration variables
+│   │       └── README.md      # Terraform documentation
+│   ├── input/                # Sample input data (Parquet files)
+│   ├── output/               # Dataflow job outputs
+│   ├── Dockerfile            # Container image definition
+│   ├── config.sh             # Configuration loader
+│   ├── run_dataflow_job.sh   # Cloud deployment script
+│   ├── test_dataflow_local.sh # Local testing script
+│   └── README.md             # Dataflow documentation
+├── requirements.txt          # Main project dependencies
+├── setup.sh                  # Environment setup script
+├── README.md                 # This file
+└── LICENSE                   # MIT License
 ```
 
 ## Contributing
@@ -153,6 +162,44 @@ trips/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Data Processing Pipeline
+
+This repository includes a complete data processing pipeline:
+
+### 1. Data Generation (`data/`)
+- Generate realistic trip data with configurable parameters
+- Support for massive parallel generation across multiple CPU cores
+- Output in CSV format for easy import into various systems
+
+### 2. Data Processing (`dataflow/`)
+- **Apache Beam Dataflow job** that converts trips to staypoints
+- **Containerized deployment** using Docker for reproducible builds
+- **Infrastructure as Code** with Terraform for GCP resources
+- **Multiple output formats**: JSON, CSV, and Hive-partitioned Parquet
+- **Scalable processing** with automatic worker scaling
+
+### 3. Data Analysis (`data/`)
+- SQL scripts for trip-to-staypoints conversion
+- Starburst/Trino integration for large-scale analytics
+- Pandas utilities for data exploration
+
+## Infrastructure Setup
+
+The project includes Terraform configuration for Google Cloud Platform:
+
+```bash
+cd dataflow/cicd/terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+This creates:
+- Dataflow service account with appropriate permissions
+- Artifact Registry for container images
+- GCS buckets for data storage
+- VPC subnet for secure Dataflow execution
+
 ## Use Cases
 
 - **Database Testing**: Generate test data for trip tracking systems
@@ -160,3 +207,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Machine Learning**: Create training data for trip prediction models
 - **Analytics**: Generate data for trip pattern analysis
 - **Load Testing**: Stress test applications with realistic data volumes
+- **Big Data Processing**: Process massive datasets using Apache Beam/Dataflow
+- **Cloud Analytics**: Deploy scalable data pipelines on Google Cloud Platform
