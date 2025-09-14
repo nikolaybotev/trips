@@ -18,15 +18,6 @@ ARTIFACT_REGISTRY_REPOSITORY_NAME=$(extract_tfvars_value "artifact_registry_repo
 SUBNET_NAME=$(extract_tfvars_value "subnet_name")
 SERVICE_ACCOUNT_NAME=$(extract_tfvars_value "service_account_name")
 
-# Derived configuration
-WORKER_SERVICE_ACCOUNT="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
-INPUT_FILES="gs://${PROJECT_ID}-starburst/trips-iceberg/data/**"
-OUTPUT_PREFIX="gs://${PROJECT_ID}-starburst/staypoints-hive-full"
-TEMP_LOCATION="gs://${PROJECT_ID}-dataflow/temp"
-STAGING_LOCATION="gs://${PROJECT_ID}-dataflow/staging"
-CONTAINER_IMAGE_URL="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY_NAME}/trips-to-staypoints-dataflow"
-SUBNETWORK_URL="https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/regions/${REGION}/subnetworks/${SUBNET_NAME}"
-
 # Display configuration
 echo "Configuration loaded:"
 echo "  - project: $PROJECT_ID"

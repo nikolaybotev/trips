@@ -4,6 +4,15 @@
 # Load configuration
 source ./config.sh
 
+# Run configuration
+WORKER_SERVICE_ACCOUNT="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+INPUT_FILES="gs://${PROJECT_ID}-starburst/trips-iceberg/data/trip_start_time_hour=2025-08-12-0**"
+OUTPUT_PREFIX="gs://${PROJECT_ID}-starburst/staypoints-hive-new"
+TEMP_LOCATION="gs://${PROJECT_ID}-dataflow/temp"
+STAGING_LOCATION="gs://${PROJECT_ID}-dataflow/staging"
+CONTAINER_IMAGE_URL="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY_NAME}/trips-to-staypoints-dataflow"
+SUBNETWORK_URL="https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/regions/${REGION}/subnetworks/${SUBNET_NAME}"
+
 # Job-specific configuration
 JOB_NAME="trips-to-staypoints-$(date +%Y%m%d-%H%M%S)"
 
@@ -29,7 +38,7 @@ python trips_to_staypoints/main.py \
     --staging_location="$STAGING_LOCATION" \
     --service_account_email="$WORKER_SERVICE_ACCOUNT" \
     --job_name="$JOB_NAME" \
-    --dataflow_service_options=min_num_workers=18 \
+    --dataflow_service_options=min_num_workers=1 \
     --max_num_workers=18 \
     --disk_size_gb=25 \
     --worker_disk_type=compute.googleapis.com/projects/$PROJECT_ID/zones/$REGION/diskTypes/pd-ssd \
