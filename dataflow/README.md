@@ -13,7 +13,7 @@ The Dataflow job processes trip data and converts it to staypoints data by:
 
 ## Files
 
-- `trips_to_staypoints_dataflow.py` - Main Dataflow pipeline
+- `trips_to_staypoints/main.py` - Main Dataflow pipeline
 - `requirements_dataflow.txt` - Python dependencies
 - `run_dataflow_job.sh` - Script to run on Google Cloud Dataflow
 - `test_dataflow_local.sh` - Script to test locally

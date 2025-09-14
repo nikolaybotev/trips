@@ -22,7 +22,7 @@ export GRPC_HTTP2_MAX_PINGS_WITHOUT_DATA=0
 export GRPC_HTTP2_MIN_RECV_PING_INTERVAL_WITHOUT_DATA_MS=300000  # 5 minutes
 
 # Run with DirectRunner for local testing with multi-processing
-python trips_to_staypoints_dataflow.py \
+python trips_to_staypoints/main.py \
     --input="$INPUT_FILE" \
     --output="$OUTPUT_PREFIX" \
     --output_format=hive \

@@ -125,7 +125,9 @@ trips/
 ├── requirements.txt          # Dependencies
 ├── setup.sh                  # Environment setup script
 ├── dataflow/                 # Apache Beam Dataflow jobs
-│   ├── trips_to_staypoints_dataflow.py
+│   ├── trips_to_staypoints/
+│   │   ├── main.py
+│   │   └── models.py
 │   ├── run_dataflow_job.sh
 │   ├── test_dataflow_local.sh
 │   └── README.md

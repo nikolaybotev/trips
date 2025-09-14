@@ -18,7 +18,7 @@ echo
 # Start the Dataflow job with the following pipeline options:
 # See https://cloud.google.com/dataflow/docs/reference/pipeline-options#pythonyaml_3
 export GOOGLE_CLOUD_PROJECT="$PROJECT_ID" # Needed by DataflowRunner
-python trips_to_staypoints_dataflow.py \
+python trips_to_staypoints/main.py \
     --input="$INPUT_FILES" \
     --output="$OUTPUT_PREFIX" \
     --output_format=hive \
