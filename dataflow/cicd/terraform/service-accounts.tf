@@ -3,10 +3,6 @@ resource "google_service_account" "dataflow_worker" {
   account_id   = var.service_account_name
   display_name = "Dataflow worker service account"
   project      = var.project_id
-
-  depends_on = [
-    google_project_service.compute
-  ]
 }
 
 # IAM bindings for Dataflow worker service account
@@ -36,18 +32,10 @@ resource "google_storage_bucket_iam_member" "storage_object_user" {
   bucket = google_storage_bucket.dataflow_bucket.name
   role    = "roles/storage.objectUser"
   member  = "serviceAccount:${google_service_account.dataflow_worker.email}"
-
-  depends_on = [
-    google_project_service.storage
-  ]
 }
 
 resource "google_storage_bucket_iam_member" "data_bucket_object_user" {
   bucket = data.google_storage_bucket.data_bucket.name
   role   = "roles/storage.objectUser"
   member = "serviceAccount:${google_service_account.dataflow_worker.email}"
-
-  depends_on = [
-    google_project_service.storage
-  ]
 }

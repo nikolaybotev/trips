@@ -12,5 +12,5 @@ subnet_cidr = "10.0.0.0/24"
 # Service Account Configuration
 service_account_name = "dataflow-worker"
 
-# Data Bucket Name
+# Data Bucket Name (pre-existing)
 data_bucket_name = "feelinsosweet-starburst"

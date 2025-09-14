@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
-  default     = "feelinsodev"
+  default     = "feelinsosweet"
 }
 
 variable "region" {
@@ -35,7 +35,7 @@ variable "service_account_name" {
 }
 
 variable "data_bucket_name" {
-  description = "Name for the Data GCS bucket"
+  description = "Name of pre-existing Data GCS bucket"
   type        = string
   default     = "feelinsosweet-starburst"
 }

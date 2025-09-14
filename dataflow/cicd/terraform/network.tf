@@ -13,8 +13,4 @@ resource "google_compute_subnetwork" "dataflow_subnet" {
   project       = var.project_id
 
   private_ip_google_access = true
-
-  depends_on = [
-    google_project_service.compute
-  ]
 }

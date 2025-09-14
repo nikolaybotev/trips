@@ -35,10 +35,6 @@ resource "google_storage_bucket" "dataflow_bucket" {
 
   # Prevent public access
   public_access_prevention = "enforced"
-
-  depends_on = [
-    google_project_service.storage
-  ]
 }
 
 # Reference existing data bucket
