@@ -19,6 +19,33 @@ gcloud services enable monitoring.googleapis.com --project=$PROJECT_ID
 echo "APIs enabled successfully!"
 echo
 
+# Create subnet for Dataflow jobs with Private Google Access
+echo "Creating subnet for Dataflow jobs..."
+
+SUBNET_NAME="dataflow-subnet"
+SUBNET_CIDR="10.0.0.0/24"
+
+# Get the default VPC network name
+DEFAULT_VPC=$(gcloud compute networks list --filter="name:default" --format="value(name)" --project=$PROJECT_ID)
+
+if [ -z "$DEFAULT_VPC" ]; then
+  echo "Error: Default VPC network not found in project $PROJECT_ID"
+  exit 1
+fi
+
+echo "Using default VPC: $DEFAULT_VPC"
+
+# Create the subnet with Private Google Access enabled
+gcloud compute networks subnets create $SUBNET_NAME \
+  --network=$DEFAULT_VPC \
+  --range=$SUBNET_CIDR \
+  --region=$REGION \
+  --enable-private-ip-google-access \
+  --project=$PROJECT_ID
+
+echo "Subnet $SUBNET_NAME created successfully with Private Google Access!"
+echo
+
 # Create Dataflow worker service account
 
 gcloud iam service-accounts create dataflow-worker \
@@ -54,4 +81,4 @@ gcloud artifacts repositories add-iam-policy-binding $ARTIFACT_REGISTRY_REPOSITO
   --role=roles/artifactregistry.reader
 
 # Create a new builder
-docker buildx create --driver=docker-container --use
+#docker buildx create --driver=docker-container --use

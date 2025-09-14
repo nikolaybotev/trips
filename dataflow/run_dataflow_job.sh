@@ -45,7 +45,8 @@ python trips_to_staypoints_dataflow.py \
     --sdk_container_image="$CONTAINER_IMAGE_URL:latest" \
     --dataflow_service_options=enable_image_streaming \
     --sdk_location=container \
-    --no_use_public_ips
+    --no_use_public_ips \
+    --subnetwork=https://www.googleapis.com/compute/v1/projects/feelinsosweet/regions/us-east1/subnetworks/dataflow-subnet
 
 echo
 echo "Dataflow job submitted!"
