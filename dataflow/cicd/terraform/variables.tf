@@ -51,3 +51,9 @@ variable "vpc_cidr" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "terraform_state_bucket" {
+  description = "GCS bucket name for storing Terraform state"
+  type        = string
+  default     = "feelinsosweet-terraform-state"
+}

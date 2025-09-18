@@ -7,6 +7,7 @@ This Terraform configuration replicates the infrastructure created by the `../..
 1. **Terraform installed**: Version 1.0 or higher
 2. **Google Cloud SDK**: Authenticated with appropriate permissions
 3. **GCP Project**: With billing enabled
+4. **GCS State Bucket**: For storing Terraform state (created automatically)
 
 ## Authentication
 
@@ -20,25 +21,72 @@ Or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to a s
 
 ## Usage
 
-1. **Initialize Terraform**:
+### First Time Setup
+
+1. **Create the state bucket**:
+   ```bash
+   ./setup_state_bucket.sh
+   ```
+
+2. **Initialize Terraform** (if you have existing state):
+   ```bash
+   ./migrate_to_remote_state.sh
+   ```
+
+   Or for new installations:
    ```bash
    terraform init
    ```
 
-2. **Review the plan**:
+3. **Review the plan**:
    ```bash
    terraform plan
    ```
 
-3. **Apply the configuration**:
+4. **Apply the configuration**:
    ```bash
    terraform apply
    ```
 
-4. **Destroy resources** (when no longer needed):
+### Regular Usage
+
+1. **Review the plan**:
+   ```bash
+   terraform plan
+   ```
+
+2. **Apply the configuration**:
+   ```bash
+   terraform apply
+   ```
+
+3. **Destroy resources** (when no longer needed):
    ```bash
    terraform destroy
    ```
+
+## State Backend Configuration
+
+This Terraform configuration uses **Google Cloud Storage (GCS)** as the backend for storing Terraform state. This provides:
+
+- **Team Collaboration**: Multiple team members can work on the same infrastructure
+- **State Locking**: Prevents concurrent modifications
+- **Versioning**: State file history and rollback capabilities
+- **Security**: Centralized state management with proper access controls
+
+### State Bucket Configuration
+
+The state is stored in: `gs://feelinsosweet-terraform-state/trips-dataflow-infrastructure/`
+
+To customize the state bucket, modify `backend.tf`:
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "your-custom-bucket-name"
+    prefix = "trips-dataflow-infrastructure"
+  }
+}
+```
 
 ## Configuration
 
@@ -50,6 +98,7 @@ The configuration can be customized by modifying `terraform.tfvars`:
 - `subnet_name`: Name for the Dataflow subnet
 - `subnet_cidr`: CIDR block for the subnet
 - `service_account_name`: Name for the Dataflow worker service account
+- `terraform_state_bucket`: GCS bucket name for Terraform state
 
 ## Resources Created
 
@@ -108,7 +157,7 @@ This Terraform configuration is organized in the `cicd/terraform/` directory:
 
 ```
 cicd/terraform/
-├── versions.tf           # Terraform and provider version constraints
+├── backend.tf            # Terraform backend and provider configuration
 ├── providers.tf          # Provider configuration
 ├── variables.tf          # Variable definitions
 ├── terraform.tfvars      # Variable values

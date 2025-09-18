@@ -16,3 +16,6 @@ service_account_name = "dataflow-worker"
 
 # Data Bucket Name (pre-existing)
 data_bucket_name = "feelinsosweet-starburst"
+
+# Terraform State Bucket
+terraform_state_bucket = "feelinsosweet-terraform-state"
