@@ -1,0 +1,162 @@
+# Google Cloud Workflow: Storage Transfer + BigQuery Query
+# This workflow demonstrates:
+# 1. Launching a Storage Transfer Service job
+# 2. Launching a BigQuery query job
+# 3. Waiting for both jobs to complete
+
+main:
+  params: [args]
+  steps:
+    # Step 1: Create Storage Transfer Job
+    - create_transfer_job:
+        call: googleapis.storagetransfer.v1.transferJobs.create
+        args:
+          body:
+            description: "Transfer data from source to destination bucket"
+            status: "ENABLED"
+            transferSpec:
+              gcsDataSource:
+                bucketName: ${args.source_bucket}
+              gcsDataSink:
+                bucketName: ${args.destination_bucket}
+              transferOptions:
+                overwriteObjectsAlreadyExistingInSink: false
+                deleteObjectsUniqueInSink: false
+                deleteObjectsFromSourceAfterTransfer: false
+        result: transfer_job_response
+
+    # Step 2: Extract transfer job name
+    - extract_transfer_job_name:
+        assign:
+          - transfer_job_name: ${transfer_job_response.name}
+
+    # Step 3: Start the transfer operation
+    - start_transfer_operation:
+        call: googleapis.storagetransfer.v1.transferJobs.runTransferJob
+        args:
+          jobName: ${transfer_job_name}
+          projectId: ${args.project_id}
+        result: transfer_operation_response
+
+    # Step 4: Extract operation name to monitor
+    - extract_operation_name:
+        assign:
+          - transfer_operation_name: ${transfer_operation_response.name}
+
+    # Step 5: Wait for Storage Transfer to complete (with polling)
+    - wait_for_transfer:
+        call: wait_for_transfer_completion
+        args:
+          operation_name: ${transfer_operation_name}
+        result: transfer_result
+
+    # Step 6: Launch BigQuery Query Job
+    - launch_bigquery_query:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${args.project_id}
+          body:
+            configuration:
+              query:
+                query: ${args.bigquery_query}
+                useLegacySql: false
+                destinationTable:
+                  projectId: ${args.project_id}
+                  datasetId: ${args.dataset_id}
+                  tableId: ${args.table_id}
+                writeDisposition: "WRITE_TRUNCATE"
+                createDisposition: "CREATE_IF_NEEDED"
+        result: bigquery_job_response
+
+    # Step 7: Extract BigQuery job ID
+    - extract_bigquery_job_id:
+        assign:
+          - bigquery_job_id: ${bigquery_job_response.jobReference.jobId}
+          - bigquery_location: ${bigquery_job_response.jobReference.location}
+
+    # Step 8: Wait for BigQuery query to complete (with polling)
+    - wait_for_bigquery:
+        call: wait_for_bigquery_completion
+        args:
+          project_id: ${args.project_id}
+          job_id: ${bigquery_job_id}
+          location: ${bigquery_location}
+        result: bigquery_result
+
+    # Step 9: Return results
+    - return_results:
+        return:
+          transfer_job_name: ${transfer_job_name}
+          transfer_operation_name: ${transfer_operation_name}
+          transfer_status: ${transfer_result.status}
+          bigquery_job_id: ${bigquery_job_id}
+          bigquery_status: ${bigquery_result.status}
+          bigquery_total_bytes_processed: ${bigquery_result.total_bytes_processed}
+
+# Subworkflow: Wait for Storage Transfer completion
+wait_for_transfer_completion:
+  params: [operation_name]
+  steps:
+    - check_transfer_status:
+        call: googleapis.storagetransfer.v1.transferOperations.get
+        args:
+          name: ${operation_name}
+        result: operation_status
+
+    - check_if_done:
+        switch:
+          - condition: ${operation_status.done == true}
+            next: return_transfer_result
+          - condition: ${true}
+            next: wait_and_retry
+
+    - wait_and_retry:
+        call: sys.sleep
+        args:
+          seconds: 10
+        next: check_transfer_status
+
+    - return_transfer_result:
+        return:
+          status: ${operation_status.status}
+          name: ${operation_status.name}
+          metadata: ${operation_status.metadata}
+
+# Subworkflow: Wait for BigQuery job completion
+wait_for_bigquery_completion:
+  params: [project_id, job_id, location]
+  steps:
+    - check_bigquery_status:
+        call: googleapis.bigquery.v2.jobs.get
+        args:
+          projectId: ${project_id}
+          jobId: ${job_id}
+          location: ${location}
+        result: job_status
+
+    - check_if_done:
+        switch:
+          - condition: ${job_status.status.state == "DONE"}
+            next: check_for_errors
+          - condition: ${true}
+            next: wait_and_retry_bq
+
+    - wait_and_retry_bq:
+        call: sys.sleep
+        args:
+          seconds: 5
+        next: check_bigquery_status
+
+    - check_for_errors:
+        switch:
+          - condition: ${job_status.status.errorResult != null}
+            raise: ${job_status.status.errorResult}
+          - condition: ${true}
+            next: return_bigquery_result
+
+    - return_bigquery_result:
+        return:
+          status: ${job_status.status.state}
+          job_id: ${job_id}
+          total_bytes_processed: ${job_status.statistics.query.totalBytesProcessed}
+          total_rows: ${job_status.statistics.query.totalRows}
